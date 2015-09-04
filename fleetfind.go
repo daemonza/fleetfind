@@ -29,6 +29,20 @@ func fleetSSH(host string, command string) (unit *FleetUnit) {
 	fleetUnit := new(FleetUnit)
 	fleetUnit.Image = string(sshOut)
 	fleetUnit.Host = host
+
+	// remove spaces
+	var results []string
+	dirty := strings.Split(string(sshOut), " ")
+	for _, a := range dirty {
+		if a != "" {
+			results = append(results, a)
+		}
+	}
+
+	for _, entry := range results {
+		fmt.Println(entry)
+	}
+
 	return fleetUnit
 }
 
