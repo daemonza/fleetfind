@@ -1,4 +1,6 @@
-// fleetfind quickly finds a docker process on a fleet cluster
+// fleetfind quickly finds a docker process on a fleet cluster.
+// This is useful for when the unit is removed from fleet but for some
+// reason the docker process still runs.
 package main
 
 import (
@@ -11,27 +13,16 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-// FleetUnit contains details about the docker process
-type FleetUnit struct {
-	Image   string // docker image name
-	Uptime  string // uptime of the process
-	Host    string // host where the process run
-	Command string // command that started the process
-}
-
-func fleetSSH(host string, command string) (unit *FleetUnit) {
+func fleetSSH(host string, command string) []string {
 	sshCmd := "fleetctl ssh " + host + " \"docker ps | grep " + command + "\""
 	sshOut, _ := exec.Command("sh", "-c", sshCmd).Output()
 	if string(sshOut) == "" {
 		return nil
 	}
 
-	fleetUnit := new(FleetUnit)
-	fleetUnit.Image = string(sshOut)
-	fleetUnit.Host = host
-
 	// remove spaces
 	var results []string
+	results = append(results, host)
 	dirty := strings.Split(string(sshOut), " ")
 	for _, a := range dirty {
 		if a != "" {
@@ -39,11 +30,7 @@ func fleetSSH(host string, command string) (unit *FleetUnit) {
 		}
 	}
 
-	for _, entry := range results {
-		fmt.Println(entry)
-	}
-
-	return fleetUnit
+	return results
 }
 
 func find(containerName string, action string) {
@@ -61,7 +48,7 @@ func find(containerName string, action string) {
 	var wg sync.WaitGroup
 	wg.Add(len(hostList))
 
-	resultsChannel := make(chan *FleetUnit)
+	resultsChannel := make(chan []string)
 
 	for host := range hostList {
 		fleetMachine := hostList[host]
@@ -78,8 +65,9 @@ func find(containerName string, action string) {
 	go func() {
 		for unitDetails := range resultsChannel {
 			if unitDetails != nil {
-				fmt.Println(unitDetails.Host)
-				fmt.Println(unitDetails.Image)
+				//fmt.Println(unitDetails.Host)
+				//fmt.Println(unitDetails.Image)
+				fmt.Println(unitDetails)
 			}
 		}
 	}()
