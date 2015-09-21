@@ -13,7 +13,7 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-func fleetSSH(host string, command string) []string {
+func dockerGrep(host string, command string) []string {
 	sshCmd := "fleetctl ssh " + host + " \"docker ps | grep " + command + "\""
 	sshOut, _ := exec.Command("sh", "-c", sshCmd).Output()
 	if string(sshOut) == "" {
@@ -54,7 +54,7 @@ func find(containerName string, action string) {
 		fleetMachine := hostList[host]
 		go func(fleetMachine string) {
 			defer wg.Done()
-			unitDetails := fleetSSH(fleetMachine, containerName)
+			unitDetails := dockerGrep(fleetMachine, containerName)
 			if action == "stop" && unitDetails != nil {
 				fmt.Println("stopping")
 			}
