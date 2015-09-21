@@ -22,7 +22,7 @@ func fleetSSH(host string, command string) []string {
 
 	// remove spaces
 	var results []string
-	results = append(results, host)
+	results = append(results, "host:"+host)
 	dirty := strings.Split(string(sshOut), " ")
 	for _, a := range dirty {
 		if a != "" {
@@ -65,8 +65,6 @@ func find(containerName string, action string) {
 	go func() {
 		for unitDetails := range resultsChannel {
 			if unitDetails != nil {
-				//fmt.Println(unitDetails.Host)
-				//fmt.Println(unitDetails.Image)
 				fmt.Println(unitDetails)
 			}
 		}
