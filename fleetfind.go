@@ -13,8 +13,10 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-func dockerGrep(host string, command string) []string {
-	sshCmd := "fleetctl ssh " + host + " \"docker ps | grep " + command + "\""
+func dockerGrep(host string, dockerProcess string) []string {
+	unitName := strings.TrimSpace(dockerProcess)
+	// search for the docker process
+	sshCmd := "fleetctl ssh " + host + " \"docker ps | grep " + unitName + "\""
 	sshOut, _ := exec.Command("sh", "-c", sshCmd).Output()
 	if string(sshOut) == "" {
 		return nil
@@ -34,6 +36,7 @@ func dockerGrep(host string, command string) []string {
 }
 
 func find(containerName string, action string) {
+	// find fleet cluster machines
 	cmd := "fleetctl list-machines | awk '/-/ {print $1}' | cut -d. -f1"
 	out, err := exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
