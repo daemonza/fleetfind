@@ -16,11 +16,12 @@ import (
 func dockerGrep(host string, dockerProcess string) []string {
 	unitName := strings.TrimSpace(dockerProcess)
 	// search for the docker process
-	sshCmd := "fleetctl ssh " + host + " \"docker ps | grep " + unitName + "\""
+	sshCmd := "ssh -C core@" + host + " \"docker ps | grep " + unitName + "\""
 	sshOut, _ := exec.Command("sh", "-c", sshCmd).Output()
 	if string(sshOut) == "" {
 		return nil
 	}
+	fmt.Println(string(sshOut))
 
 	// remove spaces
 	var results []string
@@ -37,7 +38,7 @@ func dockerGrep(host string, dockerProcess string) []string {
 
 func find(containerName string, action string) {
 	// find fleet cluster machines
-	cmd := "fleetctl list-machines | awk '/-/ {print $1}' | cut -d. -f1"
+	cmd := "fleetctl list-machines | awk '/platform/ {print $2}'"
 	out, err := exec.Command("sh", "-c", cmd).Output()
 	if err != nil {
 		fmt.Println("ERROR : " + err.Error())
